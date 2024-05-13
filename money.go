@@ -161,14 +161,29 @@ func (d *Money) ConvertCurrency(rate *Money, targetCurrencyCode string) (*Money,
 	return nil, errors.New("conversion rate currency mismatch with current currency")
 }
 
-// Round rounds the Money to a specific number of Money places.
 func (d *Money) Round(places int32) *Money {
+	deltaExp := int64(d.exp - places) // Difference in exponent from current to target.
 	factor := big.NewInt(10)
-	factor.Exp(factor, big.NewInt(int64(-d.exp+places)), nil)
-	rounded := new(big.Int).Add(d.value, big.NewInt(5)) // for rounding off
-	rounded.Div(rounded, factor)
-	rounded.Mul(rounded, factor)
+	factor = factor.Exp(factor, big.NewInt(abs(deltaExp)), nil) // 10^|deltaExp| for scaling.
+
+	rounded := new(big.Int).Set(d.value)
+	if deltaExp < 0 {
+		// Positive deltaExp means we need to multiply to scale down.
+		rounded.Div(rounded, factor) // Divide to scale down.
+	} else {
+		// Negative deltaExp means we need to multiply to scale up.
+		rounded.Mul(rounded, factor) // Multiply to scale up.
+	}
+
+	// No need to adjust back since we're setting the exponent directly.
 	return &Money{value: rounded, exp: places}
+}
+
+func abs(x int64) int64 {
+	if x < 0 {
+		return -x
+	}
+	return x
 }
 
 // Compare compares this Money to another. Returns -1, 0, or 1.
