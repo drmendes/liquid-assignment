@@ -83,3 +83,12 @@ Cons:
 - Error handling in Golang can be verbose due to the lack of exceptions or advanced Result types.
 - Library Ecosystem is not has big and established as, for instance, Javascript or Python.
 
+
+# Use
+I left an example which can be run with
+```go
+go run ./example/example.go
+```
+
+# TODO
+Unit tests and finding the best way of integrating third party tooling. 
