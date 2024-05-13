@@ -2,15 +2,15 @@
 This is a response to the assignment provided by Liquid.
 
 ## Considerations:
-- A monetary amount could be $4.00 or €2.17. 
-- Reports aggregate all of these amounts and present a total monetary sum. 
+- A monetary amount could be $4.00 or €2.17.
+- Reports aggregate all of these amounts and present a total monetary sum.
 - All present this data in Euros, often rounded to a whole number.
 - The data will primarily come from accounting software or banking software, either through
-a file or an API integration.
+  a file or an API integration.
 
 ## Task
 Design a type (class / struct) that can handle these monetary amounts in a safe
-way. 
+way.
 
 ### Which operations would make sense for this/such type?
 basics:
@@ -45,3 +45,11 @@ constraints of this/such type.
 
 
 ## Future
+
+
+
+
+
+https://github.com/shopspring/decimal
+https://pkg.go.dev/math/big
+
