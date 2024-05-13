@@ -41,34 +41,43 @@ func NewFromString(str string) (*Money, error) {
 	}, nil
 }
 
-// Add adds two Moneys
+// Add adds two Money
 func (d *Money) Add(other *Money) *Money {
 	if other == nil {
 		return d
 	}
 
-	// Scale value and exp to the same level
-	scaleDiff := d.exp - other.exp
-	if scaleDiff > 0 {
-		// Scale other up
-		otherVal := new(big.Int).Mul(other.value, big.NewInt(10).Exp(big.NewInt(10), big.NewInt(int64(scaleDiff)), nil))
-		return &Money{
-			value: new(big.Int).Add(d.value, otherVal),
-			exp:   d.exp,
-		}
-	} else if scaleDiff < 0 {
-		// Scale d up
-		dVal := new(big.Int).Mul(d.value, big.NewInt(10).Exp(big.NewInt(10), big.NewInt(int64(-scaleDiff)), nil))
-		return &Money{
-			value: new(big.Int).Add(dVal, other.value),
-			exp:   other.exp,
-		}
+	dVal := new(big.Int).Set(d.value)
+	otherVal := new(big.Int).Set(other.value)
+	var finalExp int32
+
+	// Determine the smallest exponent to use as the base
+	if d.exp < other.exp {
+		finalExp = d.exp
+	} else {
+		finalExp = other.exp
 	}
 
-	// Same scale
+	// Scale dVal and otherVal to have the same exponent
+	scaleDiffD := finalExp - d.exp
+	scaleDiffOther := finalExp - other.exp
+
+	if scaleDiffD != 0 {
+		scaleFactor := big.NewInt(10).Exp(big.NewInt(10), big.NewInt(int64(-scaleDiffD)), nil)
+		dVal.Mul(dVal, scaleFactor)
+	}
+	if scaleDiffOther != 0 {
+		scaleFactor := big.NewInt(10).Exp(big.NewInt(10), big.NewInt(int64(-scaleDiffOther)), nil)
+		otherVal.Mul(otherVal, scaleFactor)
+	}
+
+	// Add the values now that they are aligned
+	newVal := new(big.Int).Add(dVal, otherVal)
+
 	return &Money{
-		value: new(big.Int).Add(d.value, other.value),
-		exp:   d.exp,
+		value:    newVal,
+		exp:      finalExp,
+		currency: d.currency,
 	}
 }
 
@@ -85,7 +94,6 @@ func (d *Money) String() string {
 	// Handle negative exponent (Money places)
 	exp := int(-d.exp)
 	if exp >= len(absoluteValue) {
-		// More Moneys than the length of absoluteValue, add leading zeros
 		return "0." + strings.Repeat("0", exp-len(absoluteValue)) + absoluteValue
 	}
 
@@ -104,7 +112,7 @@ func (d *Money) Multiply(other *Money) *Money {
 		return nil
 	}
 	newValue := new(big.Int).Mul(d.value, other.value)
-	newExp := d.exp + other.exp // Adjusting the exponent correctly
+	newExp := d.exp + other.exp
 	return &Money{
 		value: newValue,
 		exp:   newExp,
