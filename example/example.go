@@ -7,11 +7,10 @@ import (
 
 func main() {
 
-	a := money.NewMoney(1000, -2) // Corrected for clarity: 166004 * 10^-3 = 166.004
+	a := money.NewMoney(217, -2)
+	b := money.NewMoney(4, 0)
 
-	b, _ := money.NewFromString("1000")
+	c := b.Add(a)
+	fmt.Println("Result:", c.String())
 
-	c, _ := b.Divide(a, 2)
-
-	fmt.Println("Result of division (c):", c.String())
 }
